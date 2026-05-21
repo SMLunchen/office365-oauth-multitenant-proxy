@@ -1,4 +1,4 @@
-.PHONY: setup build up down logs shell-admin build-proxy restart-admin
+.PHONY: setup build up down logs shell-admin build-proxy restart-admin renew-certs
 
 setup:
 	@bash setup.sh
@@ -23,3 +23,6 @@ shell-admin:
 
 restart-admin:
 	docker compose restart admin
+
+renew-certs:
+	@bash renew-certs.sh

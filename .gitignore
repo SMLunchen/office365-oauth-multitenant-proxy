@@ -33,6 +33,13 @@ build/
 *.swp
 *.swo
 
+# Nginx — generated files (certs contain private keys, never commit)
+nginx/certs/
+nginx/letsencrypt/
+nginx/webroot/
+nginx/nginx.conf
+renew-certs.sh
+
 # OS
 .DS_Store
 Thumbs.db

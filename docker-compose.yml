@@ -42,3 +42,21 @@ services:
     networks:
       - admin_net
       - proxy_net
+
+  nginx:
+    profiles: ["proxy"]
+    image: nginx:alpine
+    container_name: smtp_proxy_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+      - ./nginx/webroot:/var/www/certbot
+      - ./nginx/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - admin_net
+    depends_on:
+      - admin
