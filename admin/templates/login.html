@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Anmelden{% endblock %}
+
+{% block auth_content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-dark">
+  <div class="card shadow-lg" style="width: 360px;">
+    <div class="card-body p-4">
+      <div class="text-center mb-4">
+        <i class="bi bi-envelope-at fs-1 text-primary"></i>
+        <h5 class="mt-2 mb-0">SMTP OAuth Proxy</h5>
+        <small class="text-secondary">Admin-Login</small>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger py-2 small">
+        <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+      </div>
+      {% endif %}
+
+      <form method="post" action="/login">
+        {% if not need_totp %}
+        <div class="mb-3">
+          <label class="form-label small">Benutzername</label>
+          <input name="username" type="text" class="form-control" autofocus required
+                 value="{{ username if username else '' }}">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small">Passwort</label>
+          <input name="password" type="password" class="form-control" required
+                 value="{{ password if password else '' }}">
+        </div>
+        {% else %}
+        <input type="hidden" name="username" value="{{ username }}">
+        <input type="hidden" name="password" value="{{ password }}">
+        <div class="mb-3">
+          <label class="form-label small">2FA-Code (Google Authenticator)</label>
+          <input name="totp_code" type="text" class="form-control form-control-lg text-center"
+                 maxlength="6" pattern="\d{6}" autofocus placeholder="000000" required>
+        </div>
+        {% endif %}
+        <button type="submit" class="btn btn-primary w-100">
+          {% if need_totp %}Code bestätigen{% else %}Anmelden{% endif %}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

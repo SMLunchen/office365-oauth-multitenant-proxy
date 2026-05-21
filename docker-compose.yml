@@ -1,0 +1,44 @@
+networks:
+  admin_net:
+    driver: bridge
+  proxy_net:
+    driver: bridge
+    name: ${PROXY_NETWORK_NAME:-smtp_proxy_net}
+
+volumes:
+  admin_data:
+  tenant_configs:
+
+services:
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    image: smtp-proxy-admin:latest
+    container_name: smtp_proxy_admin
+    restart: unless-stopped
+    environment:
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      PROXY_NETWORK_NAME: ${PROXY_NETWORK_NAME:-smtp_proxy_net}
+      PROXY_IMAGE_NAME: ${PROXY_IMAGE_NAME:-smtp-proxy-tenant}
+      TENANT_CONFIG_DIR: /tenant_configs
+      PORT_MODE_ENABLED: ${PORT_MODE_ENABLED:-true}
+      PORT_MODE_BASE_PORT: ${PORT_MODE_BASE_PORT:-10025}
+      SUBDOMAIN_MODE_ENABLED: ${SUBDOMAIN_MODE_ENABLED:-false}
+      SUBDOMAIN_BASE_DOMAIN: ${SUBDOMAIN_BASE_DOMAIN:-}
+      ADMIN_BF_MAX_ATTEMPTS: ${ADMIN_BF_MAX_ATTEMPTS:-5}
+      ADMIN_BF_LOCKOUT_MINUTES: ${ADMIN_BF_LOCKOUT_MINUTES:-15}
+      SMTP_BF_MAX_ATTEMPTS: ${SMTP_BF_MAX_ATTEMPTS:-5}
+      SMTP_BF_LOCKOUT_MINUTES: ${SMTP_BF_LOCKOUT_MINUTES:-30}
+    volumes:
+      - admin_data:/data
+      - tenant_configs:/tenant_configs
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${ADMIN_PORT:-8080}:8080"
+    networks:
+      - admin_net
+      - proxy_net

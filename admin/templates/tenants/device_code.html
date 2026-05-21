@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Geräte-Code-Anmeldung{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="/tenants/{{ tenant_id }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+  <h4 class="mb-0">Microsoft-Anmeldung (Geräte-Code)</h4>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<div class="row">
+  <div class="col-lg-6">
+    <div class="card mb-4">
+      <div class="card-body">
+        <p class="mb-3">Öffne im Browser: <a href="{{ verification_uri }}" target="_blank" class="text-primary">{{ verification_uri }}</a></p>
+        <p class="mb-2">Und gib diesen Code ein:</p>
+        <div class="display-5 fw-bold text-center text-primary border rounded py-3 mb-3 font-monospace">
+          {{ user_code }}
+        </div>
+        <p class="text-secondary small">{{ message }}</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Nach der Anmeldung</div>
+      <div class="card-body">
+        <form method="post" action="/tenants/{{ tenant_id }}/oauth/device-code/complete">
+          <input type="hidden" name="flow_json" value="{{ flow_json }}">
+          <input type="hidden" name="client_id" value="{{ client_id }}">
+          <input type="hidden" name="azure_tenant_id" value="{{ azure_tenant_id }}">
+          <div class="mb-3">
+            <label class="form-label">Client Secret</label>
+            <input name="client_secret" type="password" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Absender-E-Mail</label>
+            <input name="sender_email" class="form-control" placeholder="nutzer@domain.de" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input name="name" class="form-control" value="Delegiertes Konto" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100">
+            <i class="bi bi-check-circle me-1"></i>Token abrufen &amp; speichern
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Tenant bearbeiten' if tenant else 'Neuer Tenant' }}{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center gap-3 mb-4">
+  <a href="/tenants" class="btn btn-sm btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h4 class="mb-0">{{ 'Tenant bearbeiten' if tenant else 'Neuer Tenant' }}</h4>
+</div>
+
+{% if error %}
+<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>{{ error }}</div>
+{% endif %}
+
+<div class="row">
+  <div class="col-lg-7">
+    <form method="post" action="{{ '/tenants/' + tenant.id|string + '/edit' if tenant else '/tenants/new' }}">
+      <div class="card mb-4">
+        <div class="card-header">Allgemein</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Name (intern)</label>
+            <input name="name" type="text" class="form-control"
+                   value="{{ tenant.name if tenant else '' }}" required
+                   placeholder="kunde-abc">
+            <div class="form-text">Eindeutiger Bezeichner, nur Buchstaben, Zahlen, Bindestriche.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Beschreibung</label>
+            <input name="description" type="text" class="form-control"
+                   value="{{ tenant.description if tenant else '' }}"
+                   placeholder="Firma XY GmbH">
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-envelope me-2"></i>SMTP-Zugangsdaten (für Drucker/Scanner)</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">SMTP-Benutzername</label>
+            <input name="smtp_username" type="text" class="form-control"
+                   value="{{ tenant.smtp_username if tenant else '' }}" required
+                   placeholder="scan@kunde.local">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">SMTP-Passwort</label>
+            <input name="smtp_password" type="password" class="form-control"
+                   placeholder="{{ '(unverändert)' if tenant else 'Sicheres Passwort' }}"
+                   {{ 'required' if not tenant else '' }}>
+          </div>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="form-label">Port</label>
+              <input name="smtp_port" type="number" class="form-control"
+                     value="{{ tenant.smtp_port if tenant else next_port }}" required
+                     min="1024" max="65535">
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">TLS-Modus</label>
+              <select name="smtp_tls_mode" class="form-select" id="tlsModeSelect" onchange="updateTlsWarn()">
+                <option value="starttls" {{ 'selected' if (tenant and tenant.smtp_tls_mode == 'starttls') or not tenant }}>
+                  STARTTLS — erzwungen (empfohlen)
+                </option>
+                <option value="starttls_optional" {{ 'selected' if tenant and tenant.smtp_tls_mode == 'starttls_optional' }}>
+                  STARTTLS — optional (für alte Geräte)
+                </option>
+                <option value="tls" {{ 'selected' if tenant and tenant.smtp_tls_mode == 'tls' }}>
+                  Direktes TLS / SMTPS (Port 465)
+                </option>
+                <option value="plain" {{ 'selected' if tenant and tenant.smtp_tls_mode == 'plain' }}>
+                  Kein TLS — unverschlüsselt
+                </option>
+              </select>
+              <div class="form-text text-warning small mt-1" id="tls-warn" style="display:none;">
+                <i class="bi bi-exclamation-triangle me-1"></i>Passwörter werden im Klartext übertragen!
+              </div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <label class="form-label">Hostname (optional, für Subdomains)</label>
+            <input name="smtp_hostname" type="text" class="form-control"
+                   value="{{ tenant.smtp_hostname if tenant and tenant.smtp_hostname else '' }}"
+                   placeholder="kunde-abc.smtp.example.com">
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save me-1"></i>{{ 'Speichern' if tenant else 'Tenant anlegen' }}
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateTlsWarn() {
+  const sel = document.getElementById('tlsModeSelect');
+  const warn = document.getElementById('tls-warn');
+  warn.style.display = (sel && sel.value === 'plain') ? 'block' : 'none';
+}
+updateTlsWarn();
+</script>
+{% endblock %}

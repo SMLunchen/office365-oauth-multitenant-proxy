@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Sicherheit{% endblock %}
+
+{% block content %}
+<h4 class="mb-4"><i class="bi bi-shield-lock me-2"></i>Brute-Force-Schutz (Admin-Login)</h4>
+
+<div class="card">
+  <div class="card-body p-0">
+    {% if records %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover table-sm mb-0">
+        <thead>
+          <tr>
+            <th>IP-Adresse</th>
+            <th>Fehlversuche</th>
+            <th>Gesperrt bis</th>
+            <th>Letzter Versuch</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rec in records %}
+          <tr class="{{ 'table-danger' if rec.locked_until and rec.locked_until > now else '' }}">
+            <td><code>{{ rec.ip_address }}</code></td>
+            <td>{{ rec.attempt_count }}</td>
+            <td>
+              {% if rec.locked_until %}
+                <span class="badge bg-danger">{{ rec.locked_until.strftime('%d.%m. %H:%M') }}</span>
+              {% else %}
+                <span class="text-secondary">–</span>
+              {% endif %}
+            </td>
+            <td class="text-secondary small">{{ rec.last_attempt.strftime('%d.%m. %H:%M:%S') }}</td>
+            <td>
+              <form method="post" action="/security/reset/{{ rec.ip_address }}">
+                <button class="btn btn-sm btn-outline-warning">
+                  <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center text-secondary py-5">
+      <i class="bi bi-shield-check fs-1 d-block mb-2"></i>
+      Keine gesperrten IPs
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-4 small text-secondary">
+  <i class="bi bi-info-circle me-1"></i>
+  Brute-Force-Schutz der SMTP-Container wird dort direkt verwaltet (In-Memory, reset bei Container-Neustart).
+</div>
+{% endblock %}

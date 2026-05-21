@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}2FA einrichten{% endblock %}
+
+{% block auth_content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-dark">
+  <div class="card shadow-lg" style="width: 420px;">
+    <div class="card-body p-4">
+      <div class="text-center mb-4">
+        <i class="bi bi-shield-lock fs-1 text-warning"></i>
+        <h5 class="mt-2 mb-0">Zwei-Faktor-Authentifizierung</h5>
+        <small class="text-secondary">Einmal einrichten, dann immer sicher</small>
+      </div>
+
+      <ol class="small text-secondary mb-3">
+        <li>Google Authenticator / Microsoft Authenticator öffnen</li>
+        <li>„+" → „QR-Code scannen"</li>
+        <li>Den Code unten eingeben</li>
+      </ol>
+
+      <div class="text-center mb-3">
+        <img src="data:image/png;base64,{{ qr_b64 }}" class="img-fluid rounded" style="max-width:200px;" alt="QR Code">
+      </div>
+
+      <div class="mb-3 text-center">
+        <small class="text-secondary">Manueller Schlüssel:</small><br>
+        <code class="small user-select-all">{{ totp_secret }}</code>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger py-2 small">
+        <i class="bi bi-exclamation-triangle me-1"></i>{{ error }}
+      </div>
+      {% endif %}
+
+      <form method="post" action="/setup-2fa">
+        <div class="mb-3">
+          <label class="form-label small">6-stelliger Code aus der App</label>
+          <input name="totp_code" type="text" class="form-control form-control-lg text-center"
+                 maxlength="6" pattern="\d{6}" autofocus placeholder="000000" required>
+        </div>
+        <button type="submit" class="btn btn-success w-100">
+          <i class="bi bi-check-circle me-1"></i>2FA aktivieren
+        </button>
+      </form>
+      <form method="post" action="/setup-2fa/skip" class="mt-2">
+        <button type="submit" class="btn btn-link w-100 text-secondary small">
+          Jetzt überspringen (wird beim nächsten Login erneut angefragt)
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
